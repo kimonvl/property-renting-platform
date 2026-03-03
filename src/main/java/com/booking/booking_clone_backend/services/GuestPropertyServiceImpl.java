@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -80,10 +81,10 @@ public class GuestPropertyServiceImpl implements GuestPropertyService {
 
     @Override
     @Transactional(readOnly = true)
-    public PropertyDetailsDTO getPropertyDetails(Long propertyId) throws EntityNotFoundException {
+    public PropertyDetailsDTO getPropertyDetails(UUID propertyId) throws EntityNotFoundException {
         Property property = null;
         try {
-            property = propertyRepo.findById(propertyId)
+            property = propertyRepo.findByUuid(propertyId)
                     .orElseThrow(() -> new EntityNotFoundException("GetDetailsProperty", "Property not found with id: " + propertyId));
 
             ReviewSummaryDTO reviewSummaryDTO = reviewService.getPropertyReviewSummary(property.getId());
@@ -96,7 +97,7 @@ public class GuestPropertyServiceImpl implements GuestPropertyService {
 
     @Override
     @Transactional(readOnly = true)
-    public boolean isPropertyExists(Long propertyId) {
-        return propertyRepo.existsById(propertyId);
+    public boolean isPropertyExists(UUID propertyId) {
+        return propertyRepo.existsByUuid(propertyId);
     }
 }

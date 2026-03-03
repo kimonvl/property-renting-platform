@@ -91,7 +91,7 @@ public class PrimaryAccountServiceImpl implements PrimaryAccountService{
             }
             // TODO add guestMessages and bookingMessages
             PropertyOperationRowDTO propertyOperationRowDTO = new PropertyOperationRowDTO(
-                    property.getId(),
+                    property.getUuid(),
                     property.getName(),
                     addressMapper.toDto(property.getAddress()),
                     property.getStatus(),

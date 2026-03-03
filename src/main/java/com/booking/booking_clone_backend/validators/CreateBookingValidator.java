@@ -10,6 +10,7 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -39,7 +40,7 @@ public class CreateBookingValidator implements Validator {
        }
     }
 
-    private void validatePropertyExists(Errors errors, Long propertyId) {
+    private void validatePropertyExists(Errors errors, UUID propertyId) {
         if (!errors.hasFieldErrors("propertyId")) {
              if (!propertyService.isPropertyExists(propertyId)) {
                  errors.rejectValue("propertyId", "create_booking.property_id.not_found");

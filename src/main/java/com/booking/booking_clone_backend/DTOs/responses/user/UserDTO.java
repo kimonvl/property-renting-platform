@@ -1,7 +1,8 @@
 package com.booking.booking_clone_backend.DTOs.responses.user;
 
-import com.booking.booking_clone_backend.models.user.RoleEnum;
 import com.booking.booking_clone_backend.models.user.User;
+
+import java.util.UUID;
 
 /**
  * Data transfer object representing a {@link User}.
@@ -9,11 +10,8 @@ import com.booking.booking_clone_backend.models.user.User;
  * <p>This DTO is returned by user-related endpoints and contains the user exposed details.</p>
  * */
 public record UserDTO (
-    // Unique identifier of the user
-    long id,
-    // Email that the user registered with
+    UUID id,
     String email,
-    //Guest or Partner
     Long roleId,
     String firstName,
     String lastName,

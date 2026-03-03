@@ -7,11 +7,13 @@ import com.booking.booking_clone_backend.exceptions.EntityNotFoundException;
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
 
+import java.util.UUID;
+
 public interface GuestPropertyService {
 
     Page<@NonNull PropertyShortDTO> search(PropertySearchRequest request);
 
-    PropertyDetailsDTO getPropertyDetails(Long propertyId) throws EntityNotFoundException;
+    PropertyDetailsDTO getPropertyDetails(UUID propertyId) throws EntityNotFoundException;
 
-    boolean isPropertyExists(Long propertyId);
+    boolean isPropertyExists(UUID propertyId);
 }

@@ -28,6 +28,7 @@ public interface UserMapper {
      * */
     @Mapping(target = "country", source = "country.code")
     @Mapping(target = "roleId", source = "role.id")
+    @Mapping(target = "id", source = "uuid")
     UserDTO toDto(User user);
 
     /**

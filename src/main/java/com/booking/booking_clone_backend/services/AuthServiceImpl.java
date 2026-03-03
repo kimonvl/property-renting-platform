@@ -55,7 +55,7 @@ public class AuthServiceImpl implements AuthService {
             }
             Country country = countryRepo.findByCode(req.country())
                     .orElseThrow(() -> new EntityInvalidArgumentException("RegisterCountry", "Country code=" + req.country() + " invalid"));
-            // TODO ADD ROLE REOPOSITORY AND CHECK ROLE EXISTS AND ADD ROLE TO USER
+
             Role role = roleRepo.findById(req.roleId())
                     .orElseThrow(() -> new EntityInvalidArgumentException("RegisterRole", "Role id=" + req.roleId() + " invalid"));
             User u = userMapper.registerRequestToUser(req, normalized, passwordEncoder.encode(req.password()), country);
@@ -84,7 +84,6 @@ public class AuthServiceImpl implements AuthService {
                 log.error("Login failed for email={}, principal not found", request.email());
                 throw new InternalErrorException("Login", "Login failed for email=" + request.email() + " due to unexpected system error");
             }
-            // TODO check role from db not request
 
             if (!principal.getRole().getId().equals(request.roleId())) {
                 log.error("Login failed for email={}, role={}", request.email(), request.roleId());

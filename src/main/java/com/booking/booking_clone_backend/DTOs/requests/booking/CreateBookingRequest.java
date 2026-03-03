@@ -5,11 +5,12 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 public record CreateBookingRequest(
 
         @NotNull(message = "{NotNull.createBookingRequest.propertyId}")
-        Long propertyId,
+        UUID propertyId,
 
         @NotNull(message = "{NotNull.createBookingRequest.checkIn}")
         LocalDate checkIn,

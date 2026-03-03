@@ -65,7 +65,7 @@ public class PropertyCustomMapper {
     public PropertyShortDTO propertyToPropertyShortDTO(Property property, ReviewSummaryDTO reviewSummaryDTO) {
 
         return new PropertyShortDTO(
-                property.getId(),
+                property.getUuid(),
                 propertyAmenitiesToAmenityDTO(property.getAllPropertyAmenities()),
                 addressMapper.toDto(property.getAddress()),
                 property.getType(),
@@ -87,7 +87,7 @@ public class PropertyCustomMapper {
     public PropertyDetailsDTO propertyToPropertyDetailsDTO(Property property, ReviewSummaryDTO reviewSummaryDTO) {
         DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH:mm");
         return new PropertyDetailsDTO(
-                property.getId(),
+                property.getUuid(),
                 propertyAmenitiesToAmenityDTO(property.getAllPropertyAmenities()),
                 addressMapper.toDto(property.getAddress()),
                 property.getType(),

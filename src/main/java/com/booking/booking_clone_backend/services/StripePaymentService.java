@@ -7,6 +7,8 @@ import com.booking.booking_clone_backend.exceptions.EntityNotFoundException;
 import com.booking.booking_clone_backend.exceptions.InternalErrorException;
 import com.stripe.exception.StripeException;
 
+import java.util.UUID;
+
 public interface StripePaymentService {
-    public String createPaymentIntent(Long bookingId, String email) throws  EntityInvalidArgumentException, EntityNotFoundException, InternalErrorException;
+    public String createPaymentIntent(UUID bookingId, String email) throws  EntityInvalidArgumentException, EntityNotFoundException, InternalErrorException;
 }

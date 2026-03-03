@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @RestController
@@ -35,11 +36,11 @@ public class BookingController {
     private final CreateBookingValidator createBookingValidator;
 
     // TODO move find booking status to booking service
-    @GetMapping("/{id}/status")
-    public ResponseEntity<@NonNull GenericResponse<BookingStatusResponse>> getStatus(@PathVariable long id) {
-        Booking b = bookingRepo.findById(id).orElseThrow();
+    @GetMapping("/{uuid}/status")
+    public ResponseEntity<@NonNull GenericResponse<BookingStatusResponse>> getStatus(@PathVariable UUID uuid) {
+        Booking b = bookingRepo.findByUuid(uuid).orElseThrow();
         return ResponseFactory.createResponse(
-                new BookingStatusResponse(b.getId(), b.getStatus(), b.getPaymentStatus()),
+                new BookingStatusResponse(b.getUuid(), b.getStatus(), b.getPaymentStatus()),
                 "Booking status fetched",
                 HttpStatus.OK,
                 true
@@ -47,7 +48,7 @@ public class BookingController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<@NonNull GenericResponse<?>> createBooking(
+    public ResponseEntity<@NonNull GenericResponse<UUID>> createBooking(
             @Valid @RequestBody CreateBookingRequest request,
             BindingResult bindingResult,
             Principal principal

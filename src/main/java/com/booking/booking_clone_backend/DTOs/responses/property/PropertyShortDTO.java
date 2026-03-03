@@ -10,9 +10,10 @@ import com.booking.booking_clone_backend.models.property.PropertyType;
 
 import java.math.BigDecimal;
 import java.util.Set;
+import java.util.UUID;
 
 public record PropertyShortDTO(
-        long id,
+        UUID id,
         Set<AmenityDTO> propertyAmenities,
         AddressDTO address,
         PropertyType type,

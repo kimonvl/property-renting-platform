@@ -29,10 +29,10 @@ public interface ReviewRepo extends JpaRepository<@NonNull Review, @NonNull Long
     @Query(
             value = """
       select new com.booking.booking_clone_backend.DTOs.responses.review.ReviewDTO(
-          r.id, r.rating, r.positiveComment, r.negativeComment,
+          r.uuid, r.rating, r.positiveComment, r.negativeComment,
           r.ownerResponse, r.createdAt, r.ownerRespondedAt,
           new com.booking.booking_clone_backend.DTOs.responses.user.UserDTO(
-            g.id,
+            g.uuid,
             g.email,
             g.role.id,
             g.firstName,

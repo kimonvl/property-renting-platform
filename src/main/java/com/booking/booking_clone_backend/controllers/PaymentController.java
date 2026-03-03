@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.Locale;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @RestController
@@ -27,7 +28,7 @@ public class PaymentController {
 
     @PostMapping("/create-intent")
     public ResponseEntity<@NonNull GenericResponse<String>> createIntent(
-            @RequestBody Long bookingId,
+            @RequestBody UUID bookingId,
             Principal principal
     ) throws EntityInvalidArgumentException, EntityNotFoundException, InternalErrorException {
         return new ResponseEntity<>(

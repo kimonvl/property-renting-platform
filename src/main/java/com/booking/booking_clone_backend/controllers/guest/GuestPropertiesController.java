@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/guest/properties")
@@ -53,7 +54,7 @@ public class GuestPropertiesController {
     }
 
     @GetMapping("/details/{propertyId}")
-    public ResponseEntity<@NonNull GenericResponse<@NonNull PropertyDetailsDTO>> getPropertyDetails(@PathVariable Long propertyId) throws EntityNotFoundException {
+    public ResponseEntity<@NonNull GenericResponse<@NonNull PropertyDetailsDTO>> getPropertyDetails(@PathVariable UUID propertyId) throws EntityNotFoundException {
 
         return new ResponseEntity<>(
                 new GenericResponse<>(

@@ -12,6 +12,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface BookingRepo extends JpaRepository<@NonNull Booking, @NonNull Long> {
     interface PropertyCountRow {
@@ -20,6 +21,7 @@ public interface BookingRepo extends JpaRepository<@NonNull Booking, @NonNull Lo
     }
 
     Optional<Booking> findByPaymentIntentId(String paymentIntentId);
+    Optional<Booking> findByUuid(UUID uuid);
 
     @Query("""
     select b.property.id as propertyId, count(b) as count

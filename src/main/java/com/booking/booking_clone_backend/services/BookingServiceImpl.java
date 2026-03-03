@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -37,12 +38,12 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @PreAuthorize("hasAnyAuthority('CREATE_BOOKING')")
     @Transactional(rollbackFor = {EntityNotFoundException.class, EntityInvalidArgumentException.class})
-    public Long createBooking(CreateBookingRequest request, String userEmail) throws EntityNotFoundException, EntityInvalidArgumentException {
+    public UUID createBooking(CreateBookingRequest request, String userEmail) throws EntityNotFoundException, EntityInvalidArgumentException {
         try {
             User user = userRepo.findByEmailIgnoreCase(userEmail)
                     .orElseThrow(() -> new EntityNotFoundException("CreateBookingUser", "user email not found. userEmail=" + userEmail));
 
-            Property property = propertyRepo.findById(request.propertyId())
+            Property property = propertyRepo.findByUuid(request.propertyId())
                     .orElseThrow(() -> new EntityNotFoundException("CreateBookingProperty", "property not found. propertyId=" + request.propertyId()));
 
             Integer maxGuests = property.getMaxGuests();
@@ -74,7 +75,7 @@ public class BookingServiceImpl implements BookingService {
             propertyAvailabilityService.blockDatesForBooking(savedBooking);
 
             log.info("Booking created successfully. propertyId={}, bookingId={}", request.propertyId(), savedBooking.getId());
-            return savedBooking.getId();
+            return savedBooking.getUuid();
 
         } catch (EntityNotFoundException | EntityInvalidArgumentException e) {
             log.warn("Failed to create booking. propertyId={}, userEmail={}. Message: {}",request.propertyId(), userEmail, e.getMessage());

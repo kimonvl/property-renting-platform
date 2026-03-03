@@ -24,6 +24,8 @@ public interface AddressMapper {
      * @return the mapped user DTO
      * */
     @Mapping(target = "country", source = "country.code")
+    @Mapping(target = "postCode", source = "postcode")
+    @Mapping(target = "propertyId", source = "uuid")
     AddressDTO toDto(PropertyAddress address);
 
     /**

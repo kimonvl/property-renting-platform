@@ -4,7 +4,9 @@ import com.booking.booking_clone_backend.DTOs.requests.booking.CreateBookingRequ
 import com.booking.booking_clone_backend.exceptions.EntityInvalidArgumentException;
 import com.booking.booking_clone_backend.exceptions.EntityNotFoundException;
 
+import java.util.UUID;
+
 public interface BookingService {
-    Long createBooking(CreateBookingRequest request, String userEmail) throws EntityNotFoundException, EntityInvalidArgumentException;
+    UUID createBooking(CreateBookingRequest request, String userEmail) throws EntityNotFoundException, EntityInvalidArgumentException;
     void deleteBooking(Long bookingId) throws EntityNotFoundException;
 }

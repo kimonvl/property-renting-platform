@@ -4,8 +4,10 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+import java.util.UUID;
+
 public record AddressDTO(
-        Long propertyId,
+        UUID propertyId,
 
         @NotBlank(message = "{NotBlank.addressDTO.country}")
         @Size(min = 2, max = 2, message = "{Size.addressDTO.country}")

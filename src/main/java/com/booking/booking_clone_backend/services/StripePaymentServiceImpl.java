@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.RoundingMode;
 import java.time.Instant;
 import java.util.Objects;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -34,7 +35,7 @@ public class StripePaymentServiceImpl implements StripePaymentService{
     @Transactional(
             noRollbackFor = {InternalErrorException.class},
             rollbackFor = {EntityNotFoundException.class, EntityInvalidArgumentException.class})
-    public String createPaymentIntent(Long bookingId, String email) throws EntityInvalidArgumentException, EntityNotFoundException, InternalErrorException {
+    public String createPaymentIntent(UUID bookingId, String email) throws EntityInvalidArgumentException, EntityNotFoundException, InternalErrorException {
         Booking booking = null;
         try {
             booking = getBooking(bookingId, email);
@@ -63,9 +64,9 @@ public class StripePaymentServiceImpl implements StripePaymentService{
     }
 
 
-    private Booking getBooking(Long bookingId, String email) throws EntityNotFoundException, EntityInvalidArgumentException {
+    private Booking getBooking(UUID bookingId, String email) throws EntityNotFoundException, EntityInvalidArgumentException {
         Booking booking;
-        booking = bookingRepo.findById(bookingId)
+        booking = bookingRepo.findByUuid(bookingId)
                 .orElseThrow(() -> new EntityNotFoundException("CreatePaymentBooking", "Booking with id=" + bookingId + " not found"));
         User user = userRepo.findByEmailIgnoreCase(email)
                 .orElseThrow(() -> new EntityNotFoundException("CreatePaymentUser", "User with email=" + email + " not found"));

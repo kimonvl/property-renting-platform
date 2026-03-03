@@ -1,6 +1,8 @@
 package com.booking.booking_clone_backend.DTOs.responses.booking;
 
+import java.util.UUID;
+
 public record CreatePaymentIntentResponse(
-        long bookingId,
+        UUID bookingId,
         String clientSecret
 ) {}
