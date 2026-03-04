@@ -1,4 +1,4 @@
-package com.booking.booking_clone_backend.config;
+package com.booking.booking_clone_backend.config.security;
 
 import com.booking.booking_clone_backend.DTOs.responses.GenericResponse;
 import com.booking.booking_clone_backend.config.filters.JwtAuthFilter;
@@ -23,7 +23,9 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -66,29 +68,9 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
-                .exceptionHandling(ex -> ex
-                        // Not authenticated -> 401
-                        .authenticationEntryPoint((req, res, e) -> {
-                            Object authException = req.getAttribute(JwtAuthFilter.AUTH_EXCEPTION_ATTR);
-                            String code = authException == null ? "UNAUTHORIZED" : "INVALID_ACCESS_TOKEN";
-                            String message = authException == null
-                                    ? "Authentication required."
-                                    : "Access token is invalid or expired.";
-                            res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                            res.setContentType("application/json");
-                            res.getWriter().write(objectMapper.writeValueAsString(
-                                    new GenericResponse<>(null, code, message, false)
-                            ));
-                        })
-                        // Authenticated but forbidden -> 403
-                        .accessDeniedHandler((req, res, e) -> {
-                            res.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                            res.setContentType("application/json");
-                            res.getWriter().write(objectMapper.writeValueAsString(
-                                    new GenericResponse<>(null, "FORBIDDEN", "Access denied.", false)
-                            ));
-                        })
-                )
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint(myCustomAuthenticationEntryPoint())
+                        .accessDeniedHandler(myCustomAccessDeniedHandler()))
 
                 .authorizeHttpRequests(auth -> auth
                         // Let Spring's error dispatch happen without security interference
@@ -181,5 +163,15 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", cfg);
         return source;
+    }
+
+    @Bean
+    public AuthenticationEntryPoint myCustomAuthenticationEntryPoint() {
+        return new CustomAuthenticationEntryPoint(objectMapper);
+    }
+
+    @Bean
+    public AccessDeniedHandler myCustomAccessDeniedHandler() {
+        return new CustomAccessDeniedHandler(objectMapper);
     }
 }

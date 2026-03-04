@@ -3,6 +3,7 @@ package com.booking.booking_clone_backend.config.filters;
 import com.booking.booking_clone_backend.services.JwtService;
 import com.booking.booking_clone_backend.services.MyUserDetailsService;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
@@ -13,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpHeaders;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -75,11 +78,18 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(auth);
 
-        } catch (JwtException | UsernameNotFoundException ex) {
-            // Invalid/expired token (or stale user) -> leave request unauthenticated.
-            SecurityContextHolder.clearContext();
-            request.setAttribute(AUTH_EXCEPTION_ATTR, ex);
-            log.warn("Authentication failed: invalid or expired token. Details: {}", ex.getMessage());
+        } catch (ExpiredJwtException e) {
+            // triggers AuthenticationEntryPoint 401
+            throw new AuthenticationCredentialsNotFoundException("Token has expired");
+        } catch (JwtException | IllegalArgumentException e) {
+            // triggers AuthenticationEntryPoint 401
+            throw new BadCredentialsException("Invalid token");
+        } catch (BadCredentialsException e) {
+            // just leave it to move to the next filter
+            throw e;
+        } catch (Exception e) {
+            log.error("Unexpected error during validation", e);
+            throw new AuthenticationCredentialsNotFoundException("Token validation failed");
         }
         chain.doFilter(request, response);
     }
