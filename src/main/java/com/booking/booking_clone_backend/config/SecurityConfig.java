@@ -100,6 +100,7 @@ public class SecurityConfig {
 
                         // Auth endpoints are public (refresh uses cookie)
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/ws/**").permitAll()
 
                         // Guest endpoints are public
                         .requestMatchers(HttpMethod.GET, "/guest/properties/details/{propertyId}").permitAll()

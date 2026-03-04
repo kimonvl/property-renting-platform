@@ -1,6 +1,7 @@
 package com.booking.booking_clone_backend.models.booking;
 
 import com.booking.booking_clone_backend.models.AbstractEntity;
+import com.booking.booking_clone_backend.models.chat.Chat;
 import com.booking.booking_clone_backend.models.property.Property;
 import com.booking.booking_clone_backend.models.user.User;
 import jakarta.persistence.*;
@@ -62,8 +63,12 @@ public class Booking extends AbstractEntity {
     private BookingStatus status = BookingStatus.CONFIRMED;
 
 
-    @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
     private BookingCheckoutDetails checkoutDetails;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "chat_id")
+    private Chat chat;
 
     public void setCheckoutDetails(BookingCheckoutDetails details) {
         // detach old
