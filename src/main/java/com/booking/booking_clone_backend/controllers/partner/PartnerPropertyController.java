@@ -3,10 +3,7 @@ package com.booking.booking_clone_backend.controllers.partner;
 import com.booking.booking_clone_backend.DTOs.requests.partner.apartment.CreatePropertyRequest;
 import com.booking.booking_clone_backend.DTOs.responses.GenericResponse;
 import com.booking.booking_clone_backend.constants.MessageConstants;
-import com.booking.booking_clone_backend.exceptions.EntityInvalidArgumentException;
-import com.booking.booking_clone_backend.exceptions.FileUploadException;
-import com.booking.booking_clone_backend.exceptions.InternalErrorException;
-import com.booking.booking_clone_backend.exceptions.ValidationException;
+import com.booking.booking_clone_backend.exceptions.*;
 import com.booking.booking_clone_backend.models.user.User;
 import com.booking.booking_clone_backend.services.PartnerPropertyService;
 import com.booking.booking_clone_backend.validators.CreateApartmentValidator;
@@ -38,7 +35,7 @@ public class PartnerPropertyController {
             @RequestPart(value = "photos") List<MultipartFile> photos,
             @RequestPart(value = "mainIndex") String mainIndex,
             @AuthenticationPrincipal User principal
-            ) throws ValidationException, EntityInvalidArgumentException, InternalErrorException, FileUploadException {
+            ) throws ValidationException, EntityInvalidArgumentException, InternalErrorException, FileUploadException, EntityNotFoundException {
 
         createApartmentValidator.validate(req, bindingResult);
         if (bindingResult.hasErrors()) {

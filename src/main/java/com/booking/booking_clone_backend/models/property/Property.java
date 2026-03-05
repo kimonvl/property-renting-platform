@@ -1,6 +1,7 @@
 package com.booking.booking_clone_backend.models.property;
 
 import com.booking.booking_clone_backend.models.AbstractEntity;
+import com.booking.booking_clone_backend.models.static_data.Amenity;
 import com.booking.booking_clone_backend.models.user.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -41,24 +42,26 @@ public class Property extends AbstractEntity {
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
 
+    @Setter(AccessLevel.NONE)
     @Getter(AccessLevel.PROTECTED)
-    @Setter(AccessLevel.PRIVATE)
-    @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<PropertyAmenity> propertyAmenities = new HashSet<>();
-    public Set<PropertyAmenity> getAllPropertyAmenities() {
-        return propertyAmenities == null
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "properties_amenities",
+            joinColumns = @JoinColumn(name = "property_id"),
+            inverseJoinColumns = @JoinColumn(name = "amenity_id")
+    )
+    private Set<Amenity> amenities = new HashSet<>();
+    public Set<Amenity> getAllAmenities() {
+        return amenities == null
                 ? Set.of()
-                : Collections.unmodifiableSet(propertyAmenities);
+                : Collections.unmodifiableSet(amenities);
     }
-    public void addPropertyAmenity(PropertyAmenity propertyAmenity) {
-        if (propertyAmenities == null) propertyAmenities = new HashSet<>();
-        propertyAmenities.add(propertyAmenity);
-        propertyAmenity.setProperty(this);
+    public void addAmenity(Amenity amenity) {
+        if (amenities == null) amenities = new HashSet<>();
+        amenities.add(amenity);
     }
-    public void removePropertyAmenity(PropertyAmenity propertyAmenity) {
-        if (propertyAmenities == null) return;
-        propertyAmenities.remove(propertyAmenity);
-        propertyAmenity.setProperty(null);
+    public void removeAmenity(Amenity amenity) {
+        if (amenities == null) return;
+        amenities.remove(amenity);
     }
 
     @Getter(AccessLevel.PROTECTED)

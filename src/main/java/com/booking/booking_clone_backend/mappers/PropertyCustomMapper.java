@@ -66,7 +66,7 @@ public class PropertyCustomMapper {
 
         return new PropertyShortDTO(
                 property.getUuid(),
-                propertyAmenitiesToAmenityDTO(property.getAllPropertyAmenities()),
+                dictionaryMapper.amenitiesToDtoSet(property.getAllAmenities()),
                 addressMapper.toDto(property.getAddress()),
                 property.getType(),
                 property.getStatus(),
@@ -88,7 +88,7 @@ public class PropertyCustomMapper {
         DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH:mm");
         return new PropertyDetailsDTO(
                 property.getUuid(),
-                propertyAmenitiesToAmenityDTO(property.getAllPropertyAmenities()),
+                dictionaryMapper.amenitiesToDtoSet(property.getAllAmenities()),
                 addressMapper.toDto(property.getAddress()),
                 property.getType(),
                 property.getName(),
@@ -124,11 +124,4 @@ public class PropertyCustomMapper {
         return photoUrls;
     }
 
-    private Set<AmenityDTO> propertyAmenitiesToAmenityDTO(Set<PropertyAmenity> propertyAmenities) {
-        Set<AmenityDTO> amenityDTOs = new HashSet<>();
-        for (PropertyAmenity pa : propertyAmenities) {
-            amenityDTOs.add(dictionaryMapper.amenityToDto(pa.getAmenity()));
-        }
-        return amenityDTOs;
-    }
 }

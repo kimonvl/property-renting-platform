@@ -7,11 +7,11 @@ import com.booking.booking_clone_backend.DTOs.requests.partner.apartment.CreateP
 import com.booking.booking_clone_backend.DTOs.requests.partner.apartment.SleepingAreasDTO;
 import com.booking.booking_clone_backend.DTOs.responses.property.AddressDTO;
 import com.booking.booking_clone_backend.exceptions.EntityInvalidArgumentException;
+import com.booking.booking_clone_backend.exceptions.EntityNotFoundException;
 import com.booking.booking_clone_backend.exceptions.FileUploadException;
 import com.booking.booking_clone_backend.exceptions.InternalErrorException;
 import com.booking.booking_clone_backend.mappers.PropertyCustomMapper;
 import com.booking.booking_clone_backend.models.static_data.Amenity;
-import com.booking.booking_clone_backend.models.property.PropertyAmenity;
 import com.booking.booking_clone_backend.models.static_data.Language;
 import com.booking.booking_clone_backend.models.property.PropertyLanguage;
 import com.booking.booking_clone_backend.models.property.*;
@@ -39,6 +39,7 @@ import java.util.Map;
 public class PartnerPropertyServiceImpl implements PartnerPropertyService {
 
     private final CloudinaryService cloudinaryService;
+    private final DictionaryService dictionaryService;
     private final PropertyRepo propertyRepo;
     private final AmenitiesRepo amenitiesRepo;
     private final CountryRepo countryRepo;
@@ -49,8 +50,7 @@ public class PartnerPropertyServiceImpl implements PartnerPropertyService {
     @PreAuthorize("hasAnyAuthority('CREATE_PROPERTY')")
     @Transactional(rollbackFor = {FileUploadException.class, EntityInvalidArgumentException.class, InternalErrorException.class})
     public void createProperty(CreatePropertyRequest request, List<MultipartFile> photos, Integer mainIndex, User user)
-            throws FileUploadException, EntityInvalidArgumentException, InternalErrorException
-    {
+            throws FileUploadException, EntityInvalidArgumentException, InternalErrorException, EntityNotFoundException {
         try {
             BedSummaryResult result = getBedSummaryResult(request.sleepingAreas());
             Property savedProperty = propertyRepo.save(propertyCustomMapper.createApartmentRequestToProperty(request, result, user));
@@ -69,7 +69,7 @@ public class PartnerPropertyServiceImpl implements PartnerPropertyService {
 
             log.info("Property created successfully with id={}", savedProperty.getId());
             propertyRepo.save(savedProperty);
-        } catch (EntityInvalidArgumentException | FileUploadException e) {
+        } catch (EntityInvalidArgumentException | FileUploadException | EntityNotFoundException e) {
             log.warn("Property creation failed for user with email ={}. Message={}", user.getEmail(), e.getMessage());
             throw e;
         } catch (JsonProcessingException e) {
@@ -108,16 +108,15 @@ public class PartnerPropertyServiceImpl implements PartnerPropertyService {
     }
 
 
-    private void addAmenities(List<String> amenityCodes, Property savedProperty) throws EntityInvalidArgumentException{
+    private void addAmenities(List<String> amenityCodes, Property savedProperty) throws EntityInvalidArgumentException, EntityNotFoundException {
+        if (!dictionaryService.findIncorrectAmenityCodes(amenityCodes).isEmpty()) {
+            throw new EntityInvalidArgumentException("CreateApartmentAmenity", "Failed to create apartment. Invalid amenity codes provided.");
+        }
         List<Amenity> amenities = amenitiesRepo.findByCodeIn(amenityCodes);
         if (amenities.isEmpty())
-            throw new EntityInvalidArgumentException("CreateApartmentAmenity", "Failed to create apartment. No valid amenities provided.");
+            throw new EntityNotFoundException("CreateApartmentAmenity", "Failed to create apartment. No valid amenities provided.");
         for (Amenity amenity : amenities) {
-            PropertyAmenity pa = new PropertyAmenity();
-            pa.setAmenity(amenity);
-            pa.setId(new PropertyAmenity.PropertyAmenityId(savedProperty.getId(), amenity.getId()));
-
-            savedProperty.addPropertyAmenity(pa);
+            savedProperty.addAmenity(amenity);
         }
     }
 
