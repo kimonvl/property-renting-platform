@@ -43,16 +43,9 @@ public class User extends AbstractEntity implements UserDetails {
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 
-    // TODO move the above to personal info table and make it one-to-one with user
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "country_code", referencedColumnName = "code", nullable = false)
-    private Country country;
-
-    @Column(name = "first_name", length = 120, nullable = false)
-    private String firstName;
-
-    @Column(name = "last_name", length = 120, nullable = false)
-    private String lastName;
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "personal_info_id")
+    private PersonalInfo personalInfo;
 
     @Column(nullable = false)
     private boolean enabled = true;

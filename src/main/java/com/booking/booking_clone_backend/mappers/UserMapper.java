@@ -26,7 +26,9 @@ public interface UserMapper {
      * @param user the user entity to convert
      * @return the mapped user DTO
      * */
-    @Mapping(target = "country", source = "country.code")
+    @Mapping(target = "firstName", source = "personalInfo.firstName")
+    @Mapping(target = "lastName", source = "personalInfo.lastName")
+    @Mapping(target = "country", source = "personalInfo.country.code")
     @Mapping(target = "roleId", source = "role.id")
     @Mapping(target = "id", source = "uuid")
     UserDTO toDto(User user);
@@ -45,10 +47,11 @@ public interface UserMapper {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "email", source = "emailNormalized")
     @Mapping(target = "passwordHash", source = "passwordHash")
-    @Mapping(target = "country", source = "country")
-    @Mapping(target = "firstName", source = "req.firstName")
-    @Mapping(target = "lastName", source = "req.lastName")
     @Mapping(target = "enabled", constant = "true")
+    @Mapping(target = "personalInfo.id", ignore = true)
+    @Mapping(target = "personalInfo.country", source = "country")
+    @Mapping(target = "personalInfo.firstName", source = "req.firstName")
+    @Mapping(target = "personalInfo.lastName", source = "req.lastName")
     User registerRequestToUser(RegisterRequest req,
                                String emailNormalized,
                                String passwordHash,

@@ -35,9 +35,9 @@ public interface ReviewRepo extends JpaRepository<@NonNull Review, @NonNull Long
             g.uuid,
             g.email,
             g.role.id,
-            g.firstName,
-            g.lastName,
-            g.country.code)
+            g.personalInfo.firstName,
+            g.personalInfo.lastName,
+            g.personalInfo.country.code)
       )
       from Review r
       join r.guest g
