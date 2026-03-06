@@ -2,10 +2,10 @@ package com.booking.booking_clone_backend.models.chat;
 
 import com.booking.booking_clone_backend.models.AbstractEntity;
 import com.booking.booking_clone_backend.models.booking.Booking;
-import com.booking.booking_clone_backend.models.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -42,49 +42,47 @@ public class Chat extends AbstractEntity {
 
     @Getter(AccessLevel.PROTECTED)
     @Setter(AccessLevel.PRIVATE)
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "chat_participants",
-            joinColumns = @JoinColumn(name = "chat_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    private Set<User> participants = new HashSet<>();
+    @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<ChatParticipant> participants = new HashSet<>();
 
-    public Set<User> getAllParticipants() {
-        return participants == null
-                ? Set.of()
-                : Collections.unmodifiableSet(participants);
+    public Set<ChatParticipant> getAllParticipants() {
+        return participants == null ? Set.of() : Collections.unmodifiableSet(participants);
     }
 
-    public void addParticipant(User user) {
+    public void addParticipant(ChatParticipant participant) {
         if (participants == null) participants = new HashSet<>();
-        participants.add(user);
+        participants.add(participant);
+        participant.setChat(this);
     }
 
-    public void removeParticipant(User user) {
+    public void removeParticipant(ChatParticipant participant) {
         if (participants == null) return;
-        participants.remove(user);
+        participants.remove(participant);
+        participant.setChat(null);
     }
 
-    @Getter(AccessLevel.PROTECTED)
-    @Setter(AccessLevel.PRIVATE)
-    @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<Message> messages = new ArrayList<>();
-    public List<Message> getAllMessages() {
-        return messages == null
-                ? List.of()
-                : Collections.unmodifiableList(messages);
-    }
+    @Column(name = "last_message_at", columnDefinition = "TIMESTAMPTZ")
+    private Instant lastMessageAt;
 
-    public void addMessage(Message message) {
-        if (messages == null) messages = new ArrayList<>();
-        messages.add(message);
-        message.setChat(this);
-    }
-
-    public void removeMessage(Message message) {
-        if (messages == null) return;
-        messages.remove(message);
-        message.setChat(null);
-    }
+//    @Getter(AccessLevel.PROTECTED)
+//    @Setter(AccessLevel.PRIVATE)
+//    @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+//    private List<Message> messages = new ArrayList<>();
+//    public List<Message> getAllMessages() {
+//        return messages == null
+//                ? List.of()
+//                : Collections.unmodifiableList(messages);
+//    }
+//
+//    public void addMessage(Message message) {
+//        if (messages == null) messages = new ArrayList<>();
+//        messages.add(message);
+//        message.setChat(this);
+//    }
+//
+//    public void removeMessage(Message message) {
+//        if (messages == null) return;
+//        messages.remove(message);
+//        message.setChat(null);
+//    }
 }

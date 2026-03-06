@@ -46,12 +46,4 @@ public class Message extends AbstractEntity {
     // TODO photos table
     @Column(name = "photo", length = 600)
     private String photo;
-
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "message_seen_by",
-            joinColumns = @JoinColumn(name = "message_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    private Set<User> message_seen_by = new HashSet<>();
 }
