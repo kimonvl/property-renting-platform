@@ -3,7 +3,7 @@ package com.booking.booking_clone_backend.DTOs.responses.realtime;
 import java.time.Instant;
 import java.util.UUID;
 
-public record ChatMessageEvent(
+public record MessageDTO(
         UUID chatUuid,
         UUID bookingUuid,
         UUID messageUuid,
