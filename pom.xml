@@ -12,11 +12,11 @@
         <relativePath/>
     </parent>
 
-    <groupId>com.booking</groupId>
-    <artifactId>booking-clone-backend</artifactId>
+    <groupId>gr.aueb.cf</groupId>
+    <artifactId>property-renting-platform</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>booking-clone-backend</name>
-    <description>Booking clone backend</description>
+    <name>property-renting-platform</name>
+    <description>Property renting platform backend</description>
 
     <properties>
         <!-- Spring Boot will configure the compiler plugin automatically from this -->
