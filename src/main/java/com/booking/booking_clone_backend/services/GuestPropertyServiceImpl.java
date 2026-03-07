@@ -21,10 +21,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -54,14 +51,15 @@ public class GuestPropertyServiceImpl implements GuestPropertyService {
 
         Page<@NonNull Property> page = propertyRepo.findAll(spec, PageRequest.of(request.page(), request.size()));
 
-        List<@NonNull Property> properties = page.getContent();
+        List<@NonNull Long> ids = page.getContent().stream().map(Property::getId).toList();
 
         // If page is empty, avoid IN () query
         Map<Long, ReviewSummaryDTO> summaryMap;
-        if (properties.isEmpty()) {
+        List<Property> properties = new ArrayList<>();
+        if (ids.isEmpty()) {
             summaryMap = Map.of();
         } else {
-            List<Long> ids = properties.stream().map(Property::getId).toList();
+            properties = propertyRepo.findAllByIdInWithAddressAndAmenities(ids);
             summaryMap = reviewRepo.getSummaryMap(ids);
         }
 
