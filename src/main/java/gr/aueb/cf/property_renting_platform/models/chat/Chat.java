@@ -62,6 +62,9 @@ public class Chat extends AbstractEntity {
     @Column(name = "last_message_at", columnDefinition = "TIMESTAMPTZ")
     private Instant lastMessageAt;
 
+    @Column(name = "last_message_author_id")
+    private Long lastMessageAuthorId;
+
 //    @Getter(AccessLevel.PROTECTED)
 //    @Setter(AccessLevel.PRIVATE)
 //    @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
