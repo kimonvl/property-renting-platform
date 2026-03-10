@@ -8,6 +8,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Mapper responsible for converting {@link User} entities
@@ -40,6 +41,8 @@ public interface UserMapper {
      * */
     @Mapping(target = "country", source = "country.code")
     List<UserDTO> toDtoList(List<User> users);
+
+    Set<UserDTO> toDtoSet(Set<User> users);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
