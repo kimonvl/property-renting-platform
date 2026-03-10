@@ -19,4 +19,5 @@ public enum CapabilityEnum {
     REPLY_REVIEW,
 
     VIEW_STATISTICS,
+    PARTNER_CHAT,
 }
