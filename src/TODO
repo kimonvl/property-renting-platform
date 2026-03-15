@@ -1,8 +1,11 @@
-fix:
-    post code goes undefined
-test: booking a property flow
+next: in chat search add the unread count with a db call for the paginated results
 
-refactor:
-    appropriate getters and setters of collections in models like cf9
-    add uuid to entities for comparison aside from the db id
-    dictionaries sorted
+create chat on booking creation
+soft delete for messages chat
+
+add address to user personal info instead of just country code
+dictionaries sorted
+
+add swagger documentation for all endpoints
+check services for N+1 queries with lazy loading
+refactor guestProperty and partnerProperty services
