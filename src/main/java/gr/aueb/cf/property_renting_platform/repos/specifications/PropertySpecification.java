@@ -1,9 +1,16 @@
 package gr.aueb.cf.property_renting_platform.repos.specifications;
 
+import gr.aueb.cf.property_renting_platform.DTOs.requests.guest.property.PropertySearchRequest;
+import gr.aueb.cf.property_renting_platform.DTOs.requests.partner.chat.ChatSearchRequest;
 import gr.aueb.cf.property_renting_platform.models.availability.PropertyAvailability;
+import gr.aueb.cf.property_renting_platform.models.chat.Chat;
 import gr.aueb.cf.property_renting_platform.models.property.PetsPolicy;
 import gr.aueb.cf.property_renting_platform.models.property.Property;
 import gr.aueb.cf.property_renting_platform.models.property.PropertyStatus;
+import gr.aueb.cf.property_renting_platform.models.static_data.Amenity;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.jpa.domain.Specification;
@@ -12,8 +19,25 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 public class PropertySpecification {
+
+    public static Specification<Property> build(PropertySearchRequest request) {
+        return Specification.allOf(
+                //isPublished(),
+                cityEqualsIgnoreCase(request.city()),
+                allowPets(request.pets()),
+                guestsAtLeast(request.maxGuest()),
+                bedroomsAtLeast(request.bedroomCount()),
+                bathroomsAtLeast(request.bathroomCount()),
+                priceBetween(request.minPrice(), request.maxPrice()),
+                availableBetween(request.checkIn(), request.checkOut()),
+                hasAllAmenities(request.amenities())
+    );
+
+    }
+
     public static Specification<@NonNull Property> isPublished() {
         return ((root, query, criteriaBuilder) ->
                 criteriaBuilder.equal(root.get("status"), PropertyStatus.PUBLISHED));
@@ -72,15 +96,6 @@ public class PropertySpecification {
         });
     }
 
-    /**
-     * Availability filter using Booking table:
-     *
-     * We want properties that have NO overlapping confirmed booking in [checkIn, checkOut).
-     * Overlap condition:
-     * booking.checkInDate < checkOut AND booking.checkOutDate > checkIn
-     *
-     * Implemented as NOT EXISTS subquery.
-     */
     public static Specification<@NonNull Property> availableBetween(LocalDate checkIn, LocalDate checkOut) {
         return (root, query, cb) -> {
             if (checkIn == null || checkOut == null) return cb.conjunction();
@@ -89,6 +104,7 @@ public class PropertySpecification {
             Subquery<Long> sq = query.subquery(Long.class);
             var pa = sq.from(PropertyAvailability.class);
 
+            // Select 1 block if exists
             sq.select(cb.literal(1L));
 
             var sameProperty = cb.equal(pa.get("property"), root);
@@ -102,6 +118,7 @@ public class PropertySpecification {
 
             sq.where(cb.and(sameProperty, overlap));
 
+            // If subquery returns one result then there is an overlap
             return cb.not(cb.exists(sq));
         };
     }
@@ -119,31 +136,41 @@ public class PropertySpecification {
 
     public static Specification<@NonNull Property> hasAllAmenities(List<String> codes) {
         return (root, query, cb) -> {
-            if (codes == null || codes.isEmpty()) return cb.conjunction();
+            if (codes == null || codes.isEmpty()) {
+                return cb.conjunction();
+            }
 
             List<String> distinctCodes = codes.stream()
-                    .filter(code -> code != null && !code.isBlank())
-                    .map(code -> code.trim().toUpperCase(Locale.ROOT))
+                    .filter(Objects::nonNull)
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .map(s -> s.toUpperCase(Locale.ROOT))
                     .distinct()
                     .toList();
-            if (distinctCodes.isEmpty()) return cb.conjunction();
 
-            var sq = query.subquery(Long.class);
-            var p2 = sq.from(Property.class);
-            var amenity = p2.join("amenities");
+            if (distinctCodes.isEmpty()) {
+                return cb.conjunction();
+            }
 
-            sq.select(cb.countDistinct(amenity.get("code")));
+            query.distinct(true);
 
+            Subquery<Long> sq = query.subquery(Long.class);
+            Root<Property> propertySubRoot = sq.from(Property.class);
+            Join<Property, Amenity> amenityJoin = propertySubRoot.join("amenities", JoinType.INNER);
+
+            // countDistinct is defensive here in case a property has an amenity 2 times (bad data)
+            // Select the number of amenity codes of a property that :
+            sq.select(cb.countDistinct(cb.upper(amenityJoin.get("code"))));
             sq.where(
-                    cb.equal(p2.get("id"), root.get("id")),
-                    cb.upper(amenity.get("code")).in(distinctCodes)
+                    // Subqueries property id reference root properties id
+                    cb.equal(propertySubRoot.get("id"), root.get("id")),
+                    // And the code is in the list of required amenities
+                    cb.upper(amenityJoin.get("code")).in(distinctCodes)
             );
 
-            // property matches all selected codes if countDistinct == number of selected codes
+            // Return properties whose subquery returned the same number of results as the distinct codes
+            // Meaning that property has all the required amenities and possibly more
             return cb.equal(sq, (long) distinctCodes.size());
         };
     }
-
-
-
 }
