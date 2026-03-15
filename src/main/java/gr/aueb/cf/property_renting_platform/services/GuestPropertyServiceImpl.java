@@ -37,28 +37,22 @@ public class GuestPropertyServiceImpl implements GuestPropertyService {
     @Override
     @Transactional(readOnly = true)
     public Page<@NonNull PropertyShortDTO> search(PropertySearchRequest request) {
-        Specification<@NonNull Property> spec = Specification
-                //.where(PropertySpecification.isPublished())
-                .where(PropertySpecification.cityEqualsIgnoreCase(request.city()))
-                .and(PropertySpecification.allowPets(request.pets()))
-                .and(PropertySpecification.guestsAtLeast(request.maxGuest()))
-                .and(PropertySpecification.bedroomsAtLeast(request.bedroomCount()))
-                .and(PropertySpecification.bathroomsAtLeast(request.bathroomCount()))
-                .and(PropertySpecification.priceBetween(request.minPrice(), request.maxPrice()))
-                .and(PropertySpecification.availableBetween(request.checkIn(), request.checkOut()))
-                .and(PropertySpecification.hasAllAmenities(request.amenities()));
 
-        Page<@NonNull Property> page = propertyRepo.findAll(spec, PageRequest.of(request.page(), request.size()));
+        // Lazy fetch, doesn't load address and amenities
+        Page<@NonNull Property> page = propertyRepo.findAll(PropertySpecification.build(request), PageRequest.of(request.page(), request.size()));
 
         List<@NonNull Long> ids = page.getContent().stream().map(Property::getId).toList();
 
-        // If page is empty, avoid IN () query
+
         Map<Long, ReviewSummaryDTO> summaryMap;
         List<Property> properties = new ArrayList<>();
         if (ids.isEmpty()) {
+            // If page is empty, avoid hydrate queries
             summaryMap = Map.of();
         } else {
+            // Hydrate data
             properties = propertyRepo.findAllByIdInWithAddressAndAmenities(ids);
+            // Get a map with property id as key and review summary dto as value
             summaryMap = reviewRepo.getSummaryMap(ids);
         }
 
