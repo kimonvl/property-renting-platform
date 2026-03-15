@@ -3,6 +3,8 @@ package gr.aueb.cf.property_renting_platform.repos.specifications;
 import gr.aueb.cf.property_renting_platform.DTOs.requests.partner.chat.ChatSearchRequest;
 import gr.aueb.cf.property_renting_platform.models.chat.Chat;
 import gr.aueb.cf.property_renting_platform.models.chat.ChatParticipant;
+import gr.aueb.cf.property_renting_platform.models.user.PersonalInfo;
+import gr.aueb.cf.property_renting_platform.models.user.User;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import org.springframework.data.jpa.domain.Specification;
@@ -39,17 +41,24 @@ public class ChatSpecification {
             if (!containsAnyLetter(normalized)) return cb.conjunction();
 
             query.distinct(true);
+
+            // Participants have to exist (inner join)
             Join<Chat, ChatParticipant> otherCp = root.join("participants", JoinType.INNER);
-            Join<Object, Object> otherUser = otherCp.join("user", JoinType.LEFT);
-            Join<Object, Object> pi = otherUser.join("personalInfo", JoinType.LEFT);
+
+            // User or personal info of participant can be null (left join)
+            Join<ChatParticipant, User> otherUser = otherCp.join("user", JoinType.LEFT);
+            Join<User, PersonalInfo> pi = otherUser.join("personalInfo", JoinType.LEFT);
 
             String likeTerm = "%" + normalized.toLowerCase(Locale.ROOT) + "%";
+
+            // Treat null personal info details as empty string (coalesce)
             var firstNameLike = cb.like(cb.lower(cb.coalesce(pi.get("firstName"), "")), likeTerm);
             var lastNameLike = cb.like(cb.lower(cb.coalesce(pi.get("lastName"), "")), likeTerm);
             var namePredicate = cb.or(firstNameLike, lastNameLike);
 
             if (currentUserId == null) return namePredicate;
 
+            // Remove chats that only current user is participant.
             return cb.and(
                     cb.notEqual(otherCp.get("user").get("id"), currentUserId),
                     namePredicate
@@ -62,13 +71,22 @@ public class ChatSpecification {
             if (!Boolean.TRUE.equals(isUnreadMessagesOnly) || currentUserId == null) return cb.conjunction();
 
             query.distinct(true);
+
+            // Keep chats that current user is participant (on)
             Join<Chat, ChatParticipant> currentCp = root.join("participants", JoinType.INNER);
             currentCp.on(cb.equal(currentCp.get("user").get("id"), currentUserId));
+
+            // Chat's lastMessageAt field is set i.e. chat has at least one message
             var hasLatestMessage = cb.isNotNull(root.get("lastMessageAt"));
+
+            // Chat's lastMessageAuthorId field doesn't reference current user
             var latestFromOtherUser = cb.notEqual(root.get("lastMessageAuthorId"), currentUserId);
+
+            // Determine if current user has unread messages for a chat
             var hasUnreadByTimestamp = cb.or(
-                    // lastMessageAt exists here, so if lastReadAt is null then it's unread
+                    // Current user haven't read yet in that chat
                     cb.isNull(currentCp.get("lastReadAt")),
+                    // Current user's last reat is before chat's last message
                     cb.greaterThan(root.get("lastMessageAt"), currentCp.get("lastReadAt"))
             );
 
